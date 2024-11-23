@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegImages } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 
-const AddProduct = () => {
+const EditProduct = () => {
   const categorys = [
     {
       id: 1,
@@ -98,11 +98,23 @@ const AddProduct = () => {
       setAllCategory(categorys);
     }
   };
+  useEffect(() => {
+    setState({
+      name: "Tshirt",
+      description: "this is t shirt",
+      discount: 10,
+      price: 3566,
+      brand: "allensoly",
+      stock: 10,
+    });
+    setCategory("Tshirt");
+    SetImageShow([{ url: "http://localhost:3000/images/admin.jpg" }]);
+  }, []);
 
   return (
     <div className="px-2 lg:pr-7 ">
       <div className="my-5">
-        <h1 className="text-xl font-bold">Add Product</h1>
+        <h1 className="text-xl font-bold">Edit Product Details</h1>
       </div>
       <div className="w-full p-4 bg-slate-600 rounded-md">
         <div className="flex justify-between items-center pb-4">
@@ -299,7 +311,7 @@ const AddProduct = () => {
             {/* button to add product */}
             <div className="">
               <button className="bg-red-600 py-2 px-3 rounded-lg text-white font-bold">
-                Add Product
+                Save Changes
               </button>
             </div>
           </form>
@@ -309,4 +321,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;

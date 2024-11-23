@@ -108,7 +108,7 @@ const AllProduct = () => {
                     <td className="border border-gray-300 px-4 py-2">
                       <div className="flex justify-center gap-3">
                         <Link
-                          to="#"
+                          to={`/seller/dashboard/edit-product/${item.id}`}
                           className="px-3 py-2 rounded-full hover:bg-blue-200 text-lg"
                         >
                           <LiaEditSolid />
