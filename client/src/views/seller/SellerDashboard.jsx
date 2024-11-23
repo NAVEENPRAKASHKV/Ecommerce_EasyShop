@@ -1,7 +1,7 @@
 import React from "react";
 
-const sellerDashboard = () => {
-  return <div>sellerDashboard</div>;
+const SellerDashboard = () => {
+  return <div>SellerDashboard</div>;
 };
 
-export default sellerDashboard;
+export default SellerDashboard;

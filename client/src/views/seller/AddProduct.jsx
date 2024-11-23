@@ -100,7 +100,10 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="px-2 lg:pr-7 pt-5">
+    <div className="px-2 lg:pr-7 ">
+      <div className="my-5">
+        <h1 className="text-xl font-bold">Add Product</h1>
+      </div>
       <div className="w-full p-4 bg-slate-600 rounded-md">
         <div className="flex justify-between items-center pb-4">
           <h1 className="text-white text-xl font-semibold">Add Product</h1>
