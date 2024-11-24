@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { admin_login, messageClear } from "../../store/Reducers/authReducer";
 import { PropagateLoader } from "react-spinners";
 import toast from "react-hot-toast";
+import { overRideStyle } from "../../utils/spinnerProperty";
 
 const AdminLogin = () => {
   const [state, setState] = useState({
@@ -28,13 +29,7 @@ const AdminLogin = () => {
     e.preventDefault();
     dispatch(admin_login(state));
   };
-  const overRideStyle = {
-    display: "flex",
-    margin: "0 auto",
-    height: "24px",
-    justifyContent: "center",
-    alignItem: "center",
-  };
+
   useEffect(() => {
     if (errorMessage) {
       toast.error(errorMessage);

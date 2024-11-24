@@ -5,6 +5,13 @@ import { FaUserTimes, FaUsers } from "react-icons/fa";
 import { MdPayment } from "react-icons/md";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { IoIosChatbubbles } from "react-icons/io";
+import { MdOutlineProductionQuantityLimits } from "react-icons/md";
+import { MdAddBox } from "react-icons/md";
+import { MdOutlineLocalOffer } from "react-icons/md";
+import { FaCartArrowDown } from "react-icons/fa";
+import { MdOutlinePayment } from "react-icons/md";
+import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
+import { CgProfile } from "react-icons/cg";
 
 export const allNav = [
   // admin navigation
@@ -75,50 +82,58 @@ export const allNav = [
   {
     id: 2,
     title: "All Product",
-    icon: <MdOutlineDashboardCustomize />,
+    icon: <MdOutlineProductionQuantityLimits />,
     role: "seller",
     path: "/seller/dashboard/all-product",
   },
   {
     id: 3,
-    title: "add Product",
-    icon: <MdOutlineDashboardCustomize />,
+    title: "Add Product",
+    icon: <MdAddBox />,
     role: "seller",
     path: "/seller/dashboard/add-product",
   },
   {
     id: 4,
     title: "Offer Product",
-    icon: <MdOutlineDashboardCustomize />,
+    icon: <MdOutlineLocalOffer />,
     role: "seller",
     path: "/seller/dashboard/offer",
   },
   {
     id: 5,
     title: "Orders",
-    icon: <MdOutlineDashboardCustomize />,
+    icon: <FaCartArrowDown />,
     role: "seller",
     path: "/seller/dashboard/orders",
   },
   {
     id: 6,
     title: "Payments",
-    icon: <MdOutlineDashboardCustomize />,
+    icon: <MdOutlinePayment />,
     role: "seller",
     path: "/seller/dashboard/payments",
   },
+
   {
     id: 7,
+    title: "Chat Customer",
+    icon: <IoChatbubbleEllipsesSharp />,
+    role: "seller",
+    path: "/seller/dashboard/chat-customer",
+  },
+  {
+    id: 8,
     title: "Chat Support",
-    icon: <MdOutlineDashboardCustomize />,
+    icon: <IoIosChatbubbles />,
     role: "seller",
     path: "/seller/dashboard/chat-support",
   },
   {
-    id: 8,
-    title: "Chat Customer",
-    icon: <MdOutlineDashboardCustomize />,
+    id: 9,
+    title: "Profile",
+    icon: <CgProfile />,
     role: "seller",
-    path: "/seller/dashboard/chat-customer",
+    path: "/seller/dashboard/profile",
   },
 ];

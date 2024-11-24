@@ -3,15 +3,17 @@ import { Link, useLocation } from "react-router-dom";
 import { getNav } from "../navigation";
 import { BiLogOutCircle } from "react-icons/bi";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import { useSelector } from "react-redux";
 
 const Sidebar = ({ showSidebar, setShowSidebar }) => {
   const [allNav, setAllNav] = useState([]);
   const { pathname } = useLocation();
+  const role = useSelector((store) => store.auth.role);
 
   useEffect(() => {
-    const navs = getNav("seller");
+    const navs = getNav(role);
     setAllNav(navs);
-  }, []);
+  }, [role]);
 
   return (
     <div>

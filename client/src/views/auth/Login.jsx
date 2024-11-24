@@ -1,13 +1,23 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { seller_login, messageClear } from "../../store/Reducers/authReducer";
+import toast from "react-hot-toast";
+import { overRideStyle } from "../../utils/spinnerProperty";
+import { PropagateLoader } from "react-spinners";
 
 const Login = () => {
   const [state, setState] = useState({
     email: "",
     password: "",
   });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loader, successMessage, errorMessage } = useSelector(
+    (store) => store.auth
+  );
   const inputHandle = (e) => {
     const { name, value } = e.target;
     setState({
@@ -17,8 +27,19 @@ const Login = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(state);
+    dispatch(seller_login(state));
   };
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate("/");
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [successMessage, errorMessage]);
   return (
     <div className="min-w-screen min-h-screen bg-[#719671] flex justify-center items-center">
       <div className="max-w-sm w-full bg-white rounded-2xl shadow-md">
@@ -73,8 +94,15 @@ const Login = () => {
             </div>
             {/* signin button */}
             <div className="flex justify-center mb-3 ">
-              <button className="bg-green-600 w-full text-white px-3  py-2 rounded-lg hover:bg-green-700">
-                Sign In
+              <button
+                disabled={loader}
+                className="bg-green-600 w-full text-white px-3  py-2 rounded-lg hover:bg-green-700"
+              >
+                {loader ? (
+                  <PropagateLoader color="#fff" cssOverride={overRideStyle} />
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </div>
             {/* new to EasyShop */}

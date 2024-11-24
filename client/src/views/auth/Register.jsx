@@ -1,6 +1,12 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { PropagateLoader } from "react-spinners";
+import { overRideStyle } from "../../utils/spinnerProperty";
+import { seller_register } from "../../store/Reducers/authReducer";
+import toast from "react-hot-toast";
+import { messageClear } from "../../store/Reducers/authReducer";
 
 const Register = () => {
   const [state, setState] = useState({
@@ -8,6 +14,14 @@ const Register = () => {
     email: "",
     password: "",
   });
+  const { loader, successMessage, errorMessage } = useSelector(
+    (store) => store.auth
+  );
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // handling the input
+
   const inputHandle = (e) => {
     const { name, value } = e.target;
     setState({
@@ -15,10 +29,25 @@ const Register = () => {
       [name]: value,
     });
   };
+
+  // handling the submission of the form
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    dispatch(seller_register(state));
     console.log(state);
   };
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate("/");
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [successMessage, errorMessage]);
   return (
     <div className="min-w-screen min-h-screen bg-[#719671] flex justify-center items-center">
       <div className="max-w-sm w-full bg-white rounded-2xl shadow-md">
@@ -94,8 +123,15 @@ const Register = () => {
             </div>
             {/* signup button */}
             <div className="flex justify-center mb-3">
-              <button className="bg-green-600 w-full text-white px-3  py-2 rounded-lg hover:bg-green-700">
-                Sign UP
+              <button
+                disabled={loader}
+                className="bg-green-600 w-full text-white px-3  py-2 rounded-lg hover:bg-green-700 "
+              >
+                {loader ? (
+                  <PropagateLoader color="#fff" cssOverride={overRideStyle} />
+                ) : (
+                  "Sign Up"
+                )}
               </button>
             </div>
             {/* already have account */}

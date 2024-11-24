@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "./../Pagination";
 import Search from "../../components/Search";
 import { FaRegEdit } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const SellerOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +53,9 @@ const SellerOrders = () => {
                 <div className=" text-black text-sm w-[18%] ">order status</div>
 
                 <div className=" text-black text-lg w-[8%] cursor-pointer  ">
-                  <FaRegEdit />
+                  <Link to={`/seller/dashboard/order/details/${4}`}>
+                    <FaRegEdit />
+                  </Link>
                 </div>
               </div>
             </div>
