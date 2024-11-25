@@ -120,7 +120,7 @@ export const allNav = [
     title: "Chat Customer",
     icon: <IoChatbubbleEllipsesSharp />,
     role: "seller",
-    path: "/seller/dashboard/chat-customer",
+    path: "/seller/dashboard/chat-customer/:id",
   },
   {
     id: 8,
