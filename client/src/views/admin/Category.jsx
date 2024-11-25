@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LiaEditSolid } from "react-icons/lia";
 import { MdAutoDelete } from "react-icons/md";
 import { Link } from "react-router-dom";
@@ -6,40 +6,99 @@ import Pagination from "../Pagination";
 import { FaImages } from "react-icons/fa";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
+import { PropagateLoader } from "react-spinners";
+import { overRideStyle } from "../../utils/spinnerProperty";
+import {
+  categoryAdd,
+  messageClear,
+  get_category,
+  updateCategory,
+} from "../../store/Reducers/categoryReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import Search from "../../components/Search";
 
 const Category = () => {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
   const [show, setShow] = useState(false);
-  // dummy data
-  const data = [
-    {
-      id: 1,
-      image: "http://localhost:3000/images/category/1.jpg",
-      name: "Category 1",
-    },
-    {
-      id: 2,
-      image: "http://localhost:3000/images/category/2.jpg",
-      name: "Category 2",
-    },
-    {
-      id: 3,
-      image: "http://localhost:3000/images/category/3.jpg",
-      name: "Category 3",
-    },
-    {
-      id: 4,
-      image: "http://localhost:3000/images/category/4.jpg",
-      name: "Category 4",
-    },
-    {
-      id: 5,
-      image: "http://localhost:3000/images/category/5.jpg",
-      name: "Category 5",
-    },
-  ];
+  const [imageShow, setImageShow] = useState("");
+  const [state, setState] = useState({
+    categoryName: "",
+    image: "",
+  });
+  const [isEdit, setIsEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  const dispatch = useDispatch();
+
+  const { loader, successMessage, errorMessage, categories, totalCategory } =
+    useSelector((store) => store.category);
+
+  // handling edit and update in single submit
+  const addOrUpdateCategory = (e) => {
+    e.preventDefault();
+    if (isEdit) {
+      dispatch(updateCategory({ id: editId, ...state })); ////to update
+    } else {
+      dispatch(categoryAdd(state));
+    }
+  };
+
+  // handlig the new image
+  const imageHandle = (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      setState({
+        ...state,
+        image: files[0],
+      });
+      setImageShow(URL.createObjectURL(files[0]));
+    }
+  };
+
+  // after posting the data to server
+  useEffect(() => {
+    if (errorMessage) {
+      toast(" errorMessage");
+      dispatch(messageClear());
+    }
+    if (successMessage) {
+      toast(successMessage);
+      dispatch(messageClear());
+      setState({
+        name: "",
+        image: "",
+      });
+      setImageShow("");
+    }
+  }, [successMessage, errorMessage]);
+
+  // to make search in the category and also fetch the data in initial rendering
+  useEffect(() => {
+    const obj = {
+      perPage: parseInt(perPage),
+      page: parseInt(currentPage),
+      searchValue,
+    };
+
+    dispatch(get_category(obj));
+  }, [perPage, currentPage, searchValue]);
+
+  // to handling the edit option in the category
+
+  const handleEdit = (category) => {
+    setState({
+      categoryName: category.categoryName,
+      image: category.image,
+    });
+    setImageShow(category.image);
+    setEditId(category._id);
+    setIsEdit(true);
+    setShow(true);
+  };
+
   return (
     <div className="px-4 lg:px-8 pt-5">
       {/* toggle button for add category small screen */}
@@ -54,23 +113,11 @@ const Category = () => {
         {/* Category List Section */}
         <div className="w-full lg:w-7/12 bg-white shadow-md rounded-md">
           {/* Table Header */}
-          <div className="h-14 bg-slate-600 rounded-t-md flex justify-between items-center px-4">
-            <select
-              onChange={(e) => setPerPage(parseInt(e.target.value))}
-              className="px-3 py-2 rounded font-semibold"
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-            <input
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="hidden md:block bg-white border border-gray-300 h-10 px-3 py-1 rounded focus:outline-none focus:border-blue-500"
-              type="text"
-              placeholder="Search"
-            />
-          </div>
+          <Search
+            setPerPage={setPerPage}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+          />
           {/* Table Body */}
           <div className="p-4">
             <table className="table-auto w-full text-center border-collapse border border-gray-300">
@@ -85,9 +132,9 @@ const Category = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.map((item, index) => (
+                {categories.map((item, index) => (
                   <tr
-                    key={item.id}
+                    key={item._id}
                     className="hover:bg-gray-100 h-[60px] border-t"
                   >
                     <td className="border border-gray-300 px-4 py-2">
@@ -96,17 +143,18 @@ const Category = () => {
                     <td className="border border-gray-300 px-4 py-2">
                       <img
                         src={item.image}
-                        alt={item.name}
-                        className="w-12 h-12 rounded-full mx-auto"
+                        alt={item.categoryName}
+                        className="w-12 h-12 mx-auto"
                       />
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
-                      {item.name}
+                      {item.categoryName}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       <div className="flex justify-center gap-3">
                         <Link
                           to="#"
+                          onClick={() => handleEdit(item)}
                           className="px-3 py-2 rounded-full hover:bg-blue-200 text-lg"
                         >
                           <LiaEditSolid />
@@ -128,7 +176,7 @@ const Category = () => {
               <Pagination
                 pageNumber={currentPage}
                 setPageNumber={setCurrentPage}
-                totalItem={50}
+                totalItem={totalCategory}
                 perPage={perPage}
                 showItem={3}
               />
@@ -144,12 +192,17 @@ const Category = () => {
         >
           <div className="flex justify-between">
             <h2 className="text-lg font-semibold mb-4 text-white text-center">
-              Add New Category
+              {isEdit ? "Update Category" : " Add New Category"}
             </h2>
             {/* close button */}
             {show && (
               <span
-                onClick={() => setShow(false)}
+                onClick={() => {
+                  setShow(false);
+                  setState({ ...state, categoryName: "" });
+                  setImageShow("");
+                  setIsEdit(false);
+                }}
                 className="text-2xl  text-white hover:cursor-pointer hover:bg-red-600 rounded-full w-8 h-8 flex justify-center items-center"
               >
                 <IoClose />
@@ -158,7 +211,10 @@ const Category = () => {
           </div>
 
           {/* Add Category Form Placeholder */}
-          <form className="mt-10 flex flex-col gap-3">
+          <form
+            className="mt-10 flex flex-col gap-3"
+            onSubmit={addOrUpdateCategory}
+          >
             <div>
               <label htmlFor="categoryName " className="text-white">
                 Category Name
@@ -166,6 +222,11 @@ const Category = () => {
               <input
                 id="categoryName"
                 name="categoryName"
+                value={state.categoryName}
+                onChange={(e) => {
+                  const { name, value } = e.target;
+                  setState({ ...state, [name]: value });
+                }}
                 type="text"
                 placeholder="Category Name"
                 className="w-full px-3 py-2 mb-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
@@ -176,25 +237,39 @@ const Category = () => {
                 htmlFor="image"
                 className=" h-[238px] w-full flex flex-col justify-center items-center cursor-pointer text-white "
               >
-                <span>
-                  <FaImages />
-                </span>
-                <span>Upload image</span>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  className="hidden"
-                  accept="image/*"
-                />
+                {imageShow ? (
+                  <img className="h-full w-full" src={imageShow} alt="img" />
+                ) : (
+                  <>
+                    <span>
+                      <FaImages />
+                    </span>
+                    <span>Upload image</span>
+                  </>
+                )}
               </label>
+              <input
+                type="file"
+                name="image"
+                id="image"
+                className="hidden"
+                accept="image/*"
+                onChange={imageHandle}
+              />
             </div>
 
             <button
+              disabled={loader}
               type="submit"
               className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
-              Add Category
+              {loader ? (
+                <PropagateLoader color="#fff" cssOverride={overRideStyle} />
+              ) : isEdit ? (
+                "Update Category"
+              ) : (
+                "Add Category"
+              )}
             </button>
           </form>
         </div>
