@@ -4,7 +4,6 @@ import api from "./../../api/api";
 export const categoryAdd = createAsyncThunk(
   "category/categoryAdd",
   async (info, { rejectWithValue, fulfillWithValue }) => {
-    console.log(info);
     try {
       const formdata = new FormData();
       formdata.append("categoryName", info.categoryName);
@@ -12,11 +11,13 @@ export const categoryAdd = createAsyncThunk(
       const response = await api.post("/category-add", formdata, {
         withCredentials: true,
       });
+      console.log("the success message");
       console.log(response.data);
       return fulfillWithValue(response.data);
     } catch (error) {
+      console.log("the error message");
       console.log(error.response);
-      rejectWithValue(error.response.data);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -38,7 +39,7 @@ export const get_category = createAsyncThunk(
       return fulfillWithValue(response.data);
     } catch (error) {
       console.log(error.response);
-      rejectWithValue(error.response.data);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -62,7 +63,23 @@ export const updateCategory = createAsyncThunk(
       return fulfillWithValue(response.data);
     } catch (error) {
       console.log(error.response);
-      rejectWithValue(error.response.data);
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const deleteCategory = createAsyncThunk(
+  "category/deleteCategory",
+  async (id, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      const response = await api.delete(`category-delete/${id}`, {
+        withCredentials: true,
+      });
+
+      console.log(response.data);
+      return fulfillWithValue(response.data);
+    } catch (error) {
+      console.log(error.response);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -89,16 +106,44 @@ const categoryReducer = createSlice({
       })
       .addCase(categoryAdd.rejected, (state, action) => {
         state.loader = false;
-        state.errorMessage = action.payload.error;
+        state.errorMessage = action.payload?.error;
       })
       .addCase(categoryAdd.fulfilled, (state, action) => {
         state.loader = false;
-        state.successMessage = action.payload.message;
-        state.categories.push(action.payload.category);
+        state.successMessage = action.payload?.message;
+        if (action.payload?.category) {
+          state.categories.push(action.payload.category);
+        }
       })
       .addCase(get_category.fulfilled, (state, action) => {
         state.totalCategory = action.payload.totalCategory;
         state.categories = action.payload.categories;
+      })
+      .addCase(updateCategory.pending, (state, _) => {
+        state.loader = true;
+      })
+      .addCase(updateCategory.fulfilled, (state, action) => {
+        state.loader = false;
+        state.successMessage = action.payload.message;
+        const index = state.categories.findIndex(
+          (cat) => cat._id === action.payload.category._id
+        );
+        state.categories[index] = action.payload.category;
+      })
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.loader = false;
+        state.errorMessage = action.payload.error;
+      })
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        state.loader = false;
+        state.successMessage = action.payload.message;
+        state.categories = state.categories.filter(
+          (cat) => cat._id !== action.meta.arg
+        );
+      })
+      .addCase(deleteCategory.rejected, (state, action) => {
+        state.loader = false;
+        state.errorMessage = action.payload.error;
       });
   },
 });

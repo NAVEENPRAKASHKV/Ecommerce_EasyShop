@@ -13,6 +13,7 @@ import {
   messageClear,
   get_category,
   updateCategory,
+  deleteCategory,
 } from "../../store/Reducers/categoryReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -41,6 +42,8 @@ const Category = () => {
     e.preventDefault();
     if (isEdit) {
       dispatch(updateCategory({ id: editId, ...state })); ////to update
+      setIsEdit(false);
+      setEditId(null);
     } else {
       dispatch(categoryAdd(state));
     }
@@ -61,7 +64,7 @@ const Category = () => {
   // after posting the data to server
   useEffect(() => {
     if (errorMessage) {
-      toast(" errorMessage");
+      toast(errorMessage);
       dispatch(messageClear());
     }
     if (successMessage) {
@@ -73,7 +76,7 @@ const Category = () => {
       });
       setImageShow("");
     }
-  }, [successMessage, errorMessage]);
+  }, [successMessage, errorMessage, dispatch]);
 
   // to make search in the category and also fetch the data in initial rendering
   useEffect(() => {
@@ -97,6 +100,12 @@ const Category = () => {
     setEditId(category._id);
     setIsEdit(true);
     setShow(true);
+  };
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure want to delete the category ?")) {
+      console.log("the deleted item is", id);
+      dispatch(deleteCategory(id));
+    }
   };
 
   return (
@@ -161,6 +170,7 @@ const Category = () => {
                         </Link>
                         <Link
                           to="#"
+                          onClick={() => handleDelete(item._id)}
                           className="px-3 py-2 rounded-full hover:bg-blue-200 text-lg"
                         >
                           <MdAutoDelete />
