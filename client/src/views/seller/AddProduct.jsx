@@ -1,36 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegImages } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { get_category } from "../../store/Reducers/categoryReducer";
+import { add_product, messageClear } from "../../store/Reducers/productReducer";
+import { toast } from "react-hot-toast";
+import { PropagateLoader } from "react-spinners";
+import { overRideStyle } from "./../../utils/spinnerProperty";
 
 const AddProduct = () => {
-  const categorys = [
-    {
-      id: 1,
-      name: "Sports",
-    },
-    {
-      id: 2,
-      name: "Tshirt",
-    },
-    {
-      id: 3,
-      name: "Mobile",
-    },
-    {
-      id: 4,
-      name: "Computer",
-    },
-    {
-      id: 5,
-      name: "Watch",
-    },
-    {
-      id: 6,
-      name: "Pant",
-    },
-  ];
-
   const [state, setState] = useState({
     name: "",
     description: "",
@@ -39,13 +19,54 @@ const AddProduct = () => {
     brand: "",
     stock: "",
   });
-
   const [cateShow, setCateShow] = useState(false); //toggle the category input
   const [category, setCategory] = useState(""); //to set category input from the modal
-  const [allCategory, setAllCategory] = useState(categorys); //all category
+  const [allCategory, setAllCategory] = useState([]); //all category
   const [searchValue, setSearchValue] = useState("");
   const [images, setImages] = useState([]); //images
   const [imageShow, SetImageShow] = useState([]); //url of the images
+
+  const dispatch = useDispatch();
+  const { categories } = useSelector((store) => store.category);
+  const { successMessage, errorMessage, loader } = useSelector(
+    (store) => store.product
+  );
+
+  //fetchin the category and update category list
+  useEffect(() => {
+    dispatch(
+      get_category({
+        perPage: "",
+        page: "",
+        searchValue: "",
+      })
+    );
+  }, []);
+  useEffect(() => {
+    setAllCategory(categories);
+  }, [categories]);
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      setState({
+        name: "",
+        description: "",
+        discount: "",
+        price: "",
+        brand: "",
+        stock: "",
+      });
+      SetImageShow([]);
+      setImages([]);
+      setCategory("");
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [errorMessage, successMessage]);
+
   // handling removing the images
   const handleRemove = (i) => {
     const filterdImages = images.filter((_, index) => index !== i);
@@ -91,12 +112,56 @@ const AddProduct = () => {
 
     if (value) {
       let srcValue = allCategory.filter((c) =>
-        c.name.toLowerCase().includes(value.toLowerCase())
+        c.categoryName.toLowerCase().includes(value.toLowerCase())
       );
       setAllCategory(srcValue);
     } else {
-      setAllCategory(categorys);
+      setAllCategory(categories);
     }
+  };
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+
+    // Validation checks form values and images
+    if (
+      !state.brand ||
+      !state.name ||
+      !state.price ||
+      !state.description ||
+      !state.discount ||
+      !state.stock
+    ) {
+      toast.error("All fields are required");
+      return;
+    }
+    if (!images || images.length === 0) {
+      toast.error("Image of the product is mandatory");
+      return;
+    }
+
+    // Create FormData
+    const formData = new FormData();
+    formData.append("brand", state.brand);
+    formData.append("description", state.description);
+    formData.append("discount", state.discount);
+    formData.append("name", state.name);
+    formData.append("price", state.price);
+    formData.append("stock", state.stock);
+    formData.append("category", category);
+    formData.append("shopName", "EasyShop");
+
+    for (let index = 0; index < images.length; index++) {
+      formData.append("images", images[index]);
+    }
+
+    // Debugging FormData content
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
+
+    // Dispatch action
+    dispatch(add_product(formData));
   };
 
   return (
@@ -112,7 +177,7 @@ const AddProduct = () => {
           </Link>
         </div>
         <div>
-          <form>
+          <form onSubmit={handleAdd}>
             {/* product and Brand */}
             <div className="flex flex-col mb-3 md:flex-row gap-4 w-full text-white">
               <div className="flex flex-col w-full gap-1">
@@ -175,30 +240,31 @@ const AddProduct = () => {
                   <div className="flex justify-start items-start flex-col h-[200px] overflow-x-scrool">
                     {allCategory.map((c, i) => (
                       <span
-                        className={`px-4 py-2 hover:bg-indigo-400 hover:text-white hover:shadow-lg w-full cursor-pointer ${
-                          category === c.name && "bg-indigo-700"
+                        key={c._id}
+                        className={`px-4 py-2 hover:bg-black hover:text-white hover:shadow-lg w-full cursor-pointer ${
+                          category === c.categoryName && "bg-indigo-700"
                         }`}
                         onClick={() => {
                           setCateShow(false);
-                          setCategory(c.name);
+                          setCategory(c.categoryName);
                           setSearchValue("");
-                          setAllCategory(categorys);
+                          setAllCategory(categories);
                         }}
                       >
-                        {c.name}{" "}
+                        {c.categoryName}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
-
+              {/* procuct stock */}
               <div className="flex flex-col w-full gap-1">
                 <label htmlFor="stock">Product Stock</label>
                 <input
                   className="px-4 py-2 focus:border-indigo-500 outline-none  border border-slate-700 rounded-md text-black"
                   onChange={inputHandle}
                   value={state.stock}
-                  type="text"
+                  type="number"
                   name="stock"
                   id="stock"
                   placeholder="Stock"
@@ -298,8 +364,15 @@ const AddProduct = () => {
             </div>
             {/* button to add product */}
             <div className="">
-              <button className="bg-red-600 py-2 px-3 rounded-lg text-white font-bold">
-                Add Product
+              <button
+                disabled={loader}
+                className="bg-red-600 py-2 px-3 rounded-lg text-white font-bold"
+              >
+                {loader ? (
+                  <PropagateLoader color="#fff" cssOverride={overRideStyle} />
+                ) : (
+                  "Add Category"
+                )}
               </button>
             </div>
           </form>

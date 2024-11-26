@@ -34,11 +34,8 @@ export const get_category = createAsyncThunk(
           withCredentials: true,
         }
       );
-
-      console.log(response.data);
       return fulfillWithValue(response.data);
     } catch (error) {
-      console.log(error.response);
       return rejectWithValue(error.response.data);
     }
   }

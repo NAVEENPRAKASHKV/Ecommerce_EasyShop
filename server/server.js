@@ -5,6 +5,7 @@ const authRouter = require("./routes/authRoutes");
 const cookieParser = require("cookie-parser");
 const { dbConnect } = require("./utils/db");
 const categoryRouter = require("./routes/dashboard/categoryRoutes");
+const productRouter = require("./routes/dashboard/productRoutes");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 app.use("/api", authRouter);
 app.use("/api", categoryRouter);
+app.use("/api", productRouter);
 
 dbConnect();
 app.listen(PORT, () => console.log(`server is running on port ${PORT}`));

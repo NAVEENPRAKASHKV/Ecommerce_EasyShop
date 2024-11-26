@@ -94,8 +94,7 @@ class categoryController {
         message: "Category added successfully",
       });
     });
-  };
-
+  }; //add_category method end
   get_category = async (req, res) => {
     const { page, searchValue, perPage } = req.query;
 
@@ -174,8 +173,6 @@ class categoryController {
     });
   }; //update_category method end
   delete_category = async (req, res) => {
-    console.log("This is delete", req.params);
-
     try {
       const { categoryId } = req.params;
       if (!categoryId) {
