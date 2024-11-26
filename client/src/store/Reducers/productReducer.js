@@ -15,6 +15,22 @@ export const add_product = createAsyncThunk(
     }
   }
 );
+export const get_editProduct = createAsyncThunk(
+  "product/get_editProduct",
+  async (productId, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      const response = await api.get(`/product-get/${productId}`, {
+        withCredentials: true,
+      });
+
+      console.log(response.data);
+      return fulfillWithValue(response.data);
+    } catch (error) {
+      console.log(error.response);
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 export const get_product = createAsyncThunk(
   "product/get_product",
   async (
@@ -23,7 +39,7 @@ export const get_product = createAsyncThunk(
   ) => {
     try {
       const response = await api.get(
-        `/category-get?page=${page}&&perPage=${perPage}&&searchValue=${searchValue}`,
+        `/products-get?page=${page}&&perPage=${perPage}&&searchValue=${searchValue}`,
         {
           withCredentials: true,
         }
@@ -37,6 +53,21 @@ export const get_product = createAsyncThunk(
     }
   }
 );
+export const update_product = createAsyncThunk(
+  "product/update_product",
+  async (product, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      const { data } = await api.post(`/product-update`, product, {
+        withCredentials: true,
+      });
+      console.log(data);
+      return fulfillWithValue(data);
+    } catch (error) {
+      // console.log(error.response.data)
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const productReducer = createSlice({
   name: "category",
@@ -45,6 +76,7 @@ const productReducer = createSlice({
     errorMessage: "",
     loader: false,
     products: [],
+    singleProduct: "",
     totalProduct: 0,
   },
   reducers: {
@@ -65,9 +97,27 @@ const productReducer = createSlice({
       .addCase(add_product.fulfilled, (state, action) => {
         state.loader = false;
         state.successMessage = action.payload?.message;
-        if (action.payload?.products) {
-          state.categories.push(action.payload.category);
-        }
+      })
+      .addCase(get_product.fulfilled, (state, action) => {
+        state.loader = false;
+        state.totalProduct = action.payload.totalProduct;
+        state.products = action.payload.products;
+      })
+      .addCase(get_editProduct.fulfilled, (state, action) => {
+        state.loader = false;
+        state.singleProduct = action.payload.product;
+      })
+      .addCase(update_product.pending, (state, { payload }) => {
+        state.loader = true;
+      })
+      .addCase(update_product.rejected, (state, { payload }) => {
+        state.loader = false;
+        state.errorMessage = payload.error;
+      })
+      .addCase(update_product.fulfilled, (state, { payload }) => {
+        state.loader = false;
+        state.singleProduct = payload.product;
+        state.successMessage = payload.message;
       });
   },
 });

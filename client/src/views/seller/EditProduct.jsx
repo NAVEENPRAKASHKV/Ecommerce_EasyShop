@@ -2,35 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegImages } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  get_editProduct,
+  update_product,
+  messageClear,
+} from "../../store/Reducers/productReducer";
+import { get_category } from "../../store/Reducers/categoryReducer";
+import { PropagateLoader } from "react-spinners";
+import { toast } from "react-hot-toast";
+import { overRideStyle } from "./../../utils/spinnerProperty";
 
 const EditProduct = () => {
-  const categorys = [
-    {
-      id: 1,
-      name: "Sports",
-    },
-    {
-      id: 2,
-      name: "Tshirt",
-    },
-    {
-      id: 3,
-      name: "Mobile",
-    },
-    {
-      id: 4,
-      name: "Computer",
-    },
-    {
-      id: 5,
-      name: "Watch",
-    },
-    {
-      id: 6,
-      name: "Pant",
-    },
-  ];
-
+  const { categories } = useSelector((store) => store.category);
+  const { productId } = useParams();
+  const dispatch = useDispatch();
   const [state, setState] = useState({
     name: "",
     description: "",
@@ -39,13 +26,50 @@ const EditProduct = () => {
     brand: "",
     stock: "",
   });
-
   const [cateShow, setCateShow] = useState(false); //toggle the category input
   const [category, setCategory] = useState(""); //to set category input from the modal
-  const [allCategory, setAllCategory] = useState(categorys); //all category
+  const [allCategory, setAllCategory] = useState(categories); //all category
   const [searchValue, setSearchValue] = useState("");
   const [images, setImages] = useState([]); //images
   const [imageShow, SetImageShow] = useState([]); //url of the images
+  const { singleProduct, loader, successMessage, errorMessage } = useSelector(
+    (store) => store.product
+  );
+
+  // useEffect
+  useEffect(() => {
+    dispatch(get_editProduct(productId));
+  }, [productId]);
+
+  useEffect(() => {
+    dispatch(
+      get_category({
+        searchValue: "",
+        parPage: "",
+        page: "",
+      })
+    );
+  }, []);
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      setState({
+        name: "",
+        description: "",
+        discount: "",
+        price: "",
+        brand: "",
+        stock: "",
+      });
+      setCategory("");
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [successMessage, errorMessage]);
+
   // handling removing the images
   const handleRemove = (i) => {
     const filterdImages = images.filter((_, index) => index !== i);
@@ -91,25 +115,40 @@ const EditProduct = () => {
 
     if (value) {
       let srcValue = allCategory.filter((c) =>
-        c.name.toLowerCase().includes(value.toLowerCase())
+        c.categoryName.toLowerCase().includes(value.toLowerCase())
       );
       setAllCategory(srcValue);
     } else {
-      setAllCategory(categorys);
+      setAllCategory(categories);
     }
   };
+
   useEffect(() => {
     setState({
-      name: "Tshirt",
-      description: "this is t shirt",
-      discount: 10,
-      price: 3566,
-      brand: "allensoly",
-      stock: 10,
+      name: singleProduct.name,
+      description: singleProduct.description,
+      discount: singleProduct.discount,
+      price: singleProduct.price,
+      brand: singleProduct.brand,
+      stock: singleProduct.stock,
     });
-    setCategory("Tshirt");
-    SetImageShow([{ url: "http://localhost:3000/images/admin.jpg" }]);
-  }, []);
+    setCategory(singleProduct.category);
+    SetImageShow(singleProduct.images);
+  }, [singleProduct]);
+  const update = (e) => {
+    e.preventDefault();
+    const obj = {
+      name: state.name,
+      description: state.description,
+      discount: state.discount,
+      price: state.price,
+      brand: state.brand,
+      stock: state.stock,
+      productId: productId,
+      category: category,
+    };
+    dispatch(update_product(obj));
+  };
 
   return (
     <div className="px-2 lg:pr-7 ">
@@ -124,7 +163,7 @@ const EditProduct = () => {
           </Link>
         </div>
         <div>
-          <form>
+          <form onSubmit={update}>
             {/* product and Brand */}
             <div className="flex flex-col mb-3 md:flex-row gap-4 w-full text-white">
               <div className="flex flex-col w-full gap-1">
@@ -188,16 +227,16 @@ const EditProduct = () => {
                     {allCategory.map((c, i) => (
                       <span
                         className={`px-4 py-2 hover:bg-indigo-400 hover:text-white hover:shadow-lg w-full cursor-pointer ${
-                          category === c.name && "bg-indigo-700"
+                          category === c.categoryName && "bg-indigo-700"
                         }`}
                         onClick={() => {
                           setCateShow(false);
-                          setCategory(c.name);
+                          setCategory(c.categoryName);
                           setSearchValue("");
-                          setAllCategory(categorys);
+                          setAllCategory(categories);
                         }}
                       >
-                        {c.name}{" "}
+                        {c.categoryName}
                       </span>
                     ))}
                   </div>
@@ -264,32 +303,33 @@ const EditProduct = () => {
             {/* images */}
             <div className="grid grid-col-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full  gap-2 mb-5">
               {/* uploaded images */}
-              {imageShow.map((img, i) => (
-                <div className="h-[180px] w-[180px] relative">
-                  <label htmlFor={i} className="cursor-pointer">
-                    {/* display uploaded images */}
-                    <img
-                      className="w-full h-full rounded-sm"
-                      src={img.url}
-                      alt=""
+              {imageShow &&
+                imageShow.map((img, i) => (
+                  <div className="h-[180px] w-[180px] relative">
+                    <label htmlFor={i} className="cursor-pointer">
+                      {/* display uploaded images */}
+                      <img
+                        className="w-full h-full rounded-sm"
+                        src={img?.url || img}
+                        alt=""
+                      />
+                    </label>
+                    {/* replace images */}
+                    <input
+                      onChange={(e) => changeImage(e.target.files[0], i)}
+                      type="file"
+                      id={i}
+                      className="hidden"
                     />
-                  </label>
-                  {/* replace images */}
-                  <input
-                    onChange={(e) => changeImage(e.target.files[0], i)}
-                    type="file"
-                    id={i}
-                    className="hidden"
-                  />
-                  {/* remove icon */}
-                  <span
-                    onClick={() => handleRemove(i)}
-                    className="absolute right-4  top-2 z-50 w-[20px] h-[20px] rounded-full bg-white hover:bg-red-500 flex justify-center items-center cursor-pointer"
-                  >
-                    <IoMdCloseCircle />
-                  </span>
-                </div>
-              ))}
+                    {/* remove icon */}
+                    <span
+                      onClick={() => handleRemove(i)}
+                      className="absolute right-4  top-2 z-50 w-[20px] h-[20px] rounded-full bg-white hover:bg-red-500 flex justify-center items-center cursor-pointer"
+                    >
+                      <IoMdCloseCircle />
+                    </span>
+                  </div>
+                ))}
               {/* uploading new images */}
               <label
                 htmlFor="image"
@@ -310,8 +350,15 @@ const EditProduct = () => {
             </div>
             {/* button to add product */}
             <div className="">
-              <button className="bg-red-600 py-2 px-3 rounded-lg text-white font-bold">
-                Save Changes
+              <button
+                disabled={loader}
+                className="bg-red-600 py-2 px-3 rounded-lg text-white font-bold"
+              >
+                {loader ? (
+                  <PropagateLoader color="#fff" cssOverride={overRideStyle} />
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </div>
           </form>
