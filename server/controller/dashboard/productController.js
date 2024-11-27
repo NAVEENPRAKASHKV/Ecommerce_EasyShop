@@ -133,8 +133,8 @@ class productController {
     const skipPage = parseInt(perPage) * (parseInt(page) - 1);
     try {
       const searchQuery = searchValue
-        ? { $text: { $search: searchValue }, sellerId: id }
-        : { sellerId: id };
+        ? { $text: { $search: searchValue }, sellerId: id, isDeleted: false }
+        : { sellerId: id, isDeleted: false };
       const totalProduct = await productModel.countDocuments(searchQuery);
       const products = await productModel
         .find(searchQuery)
@@ -289,6 +289,34 @@ class productController {
       }
     });
   };
+  delete_product = async (req, res) => {
+    try {
+      const { productId } = req.params;
+      if (!productId) {
+        return responseReturn(res, 400, { error: "product ID is required" });
+      }
+      const deletedProduct = await productModel.findByIdAndUpdate(
+        productId,
+        {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+        { new: true }
+      );
+      if (!deletedProduct) {
+        return responseReturn(res, 404, {
+          error: "The Product was not found",
+        });
+      }
+      return responseReturn(res, 200, {
+        deletedProduct,
+        message: "The Product  was successfully deleted",
+      });
+    } catch (error) {
+      console.error("Error during deletion:", error);
+      return responseReturn(res, 500, { error: "Internal server error" });
+    }
+  }; // End of delete_category
 }
 
 module.exports = new productController();

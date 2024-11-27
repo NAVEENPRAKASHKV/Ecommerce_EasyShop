@@ -11,5 +11,10 @@ router.get(
   productController.get_editProduct
 );
 router.put("/product-update", authMiddleware, productController.product_update);
+router.put(
+  "/product-delete/:productId",
+  authMiddleware,
+  productController.delete_product
+);
 
 module.exports = router;

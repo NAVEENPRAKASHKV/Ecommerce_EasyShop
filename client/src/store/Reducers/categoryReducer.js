@@ -68,14 +68,29 @@ export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
   async (id, { rejectWithValue, fulfillWithValue }) => {
     try {
-      const response = await api.delete(`category-delete/${id}`, {
-        withCredentials: true,
-      });
+      console.log(id);
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        return rejectWithValue({
+          error: "Authentication token not found please login",
+        });
+      }
+      const response = await api.put(
+        `category-delete/${id}`,
+        {
+          isDeleted: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in the Authorization header
+          },
+          withCredentials: true, // Keep this if you need cookies for cross-origin requests
+        }
+      );
 
-      console.log(response.data);
+      console.log("Soft Delete Response:", response.data);
       return fulfillWithValue(response.data);
     } catch (error) {
-      console.log(error.response);
       return rejectWithValue(error.response.data);
     }
   }

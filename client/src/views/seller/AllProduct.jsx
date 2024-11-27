@@ -6,14 +6,20 @@ import { MdAutoDelete } from "react-icons/md";
 import { FaEye } from "react-icons/fa6";
 import Pagination from "../Pagination";
 import { useDispatch, useSelector } from "react-redux";
-import { get_product } from "../../store/Reducers/productReducer";
+import { toast } from "react-hot-toast";
+import {
+  get_product,
+  delete_product,
+} from "../../store/Reducers/productReducer";
 
 const AllProduct = () => {
   const [perPage, setPerPage] = useState("5");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState("1");
   const dispatch = useDispatch();
-  const { totalProduct, products } = useSelector((store) => store.product);
+  const { totalProduct, products, successMessage, errorMessage } = useSelector(
+    (store) => store.product
+  );
 
   useEffect(() => {
     const obj = {
@@ -24,6 +30,19 @@ const AllProduct = () => {
     console.log(obj);
     dispatch(get_product(obj));
   }, [searchValue, currentPage, perPage]);
+
+  const handleDelete = (id) => {
+    console.log("the delete button pressed");
+    dispatch(delete_product(id));
+  };
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+  }, [successMessage, errorMessage]);
 
   return (
     <div className="px-2 md:pr-7">
@@ -109,6 +128,7 @@ const AllProduct = () => {
                         </Link>
                         <Link
                           to="#"
+                          onClick={() => handleDelete(item._id)}
                           className="px-3 py-2 rounded-full hover:bg-blue-200 text-lg"
                         >
                           <MdAutoDelete />

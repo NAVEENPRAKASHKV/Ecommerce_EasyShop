@@ -73,6 +73,37 @@ export const update_product = createAsyncThunk(
     }
   }
 );
+export const delete_product = createAsyncThunk(
+  "product/delete_product",
+  async (id, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      console.log(id);
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        return rejectWithValue({
+          error: "Authentication token not found please login",
+        });
+      }
+      const response = await api.put(
+        `product-delete/${id}`,
+        {
+          isDeleted: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in the Authorization header
+          },
+          withCredentials: true, // Keep this if you need cookies for cross-origin requests
+        }
+      );
+
+      console.log("Soft Delete Response:", response.data);
+      return fulfillWithValue(response.data);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const productReducer = createSlice({
   name: "category",
@@ -123,6 +154,17 @@ const productReducer = createSlice({
         state.loader = false;
         state.singleProduct = payload.updatedProduct;
         state.successMessage = payload.message;
+      })
+      .addCase(delete_product.rejected, (state, action) => {
+        state.loader = false;
+        state.errorMessage = action.payload.error;
+      })
+      .addCase(delete_product.fulfilled, (state, action) => {
+        state.loader = false;
+        state.successMessage = action.payload.message;
+        state.products = state.products.filter(
+          (pro) => pro._id !== action.meta.arg
+        );
       });
   },
 });

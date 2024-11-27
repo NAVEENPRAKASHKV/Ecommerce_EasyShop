@@ -104,8 +104,8 @@ class categoryController {
     try {
       // Dynamic search query
       const searchQuery = searchValue
-        ? { $text: { $search: searchValue } }
-        : {};
+        ? { $text: { $search: searchValue }, isDeleted: false }
+        : { isDeleted: false };
 
       // Get total count for the search query
       const totalCategory = await categoryModel.countDocuments(searchQuery);
@@ -179,13 +179,24 @@ class categoryController {
         return responseReturn(res, 400, { error: "Category ID is required" });
       }
 
-      const deletedCategory = await categoryModel.findByIdAndDelete(categoryId);
+      // Perform soft delete by setting 'isDeleted' to true and recording the 'deletedAt' timestamp
+      const deletedCategory = await categoryModel.findByIdAndUpdate(
+        categoryId,
+        {
+          isDeleted: true,
+          deletedAt: new Date(), // Correctly setting the current date and time
+        },
+        { new: true } // Ensure the updated document is returned
+      );
 
+      // Check if the category exists and was updated
       if (!deletedCategory) {
-        return responseReturn(res, 404, { error: "The data was not found" });
+        return responseReturn(res, 404, {
+          error: "The category was not found",
+        });
       }
 
-      responseReturn(res, 200, {
+      return responseReturn(res, 200, {
         deletedCategory,
         message: "The category was successfully deleted",
       });
