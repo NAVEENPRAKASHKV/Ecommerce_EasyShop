@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import {
   get_product,
   delete_product,
+  messageClear,
 } from "../../store/Reducers/productReducer";
 
 const AllProduct = () => {
@@ -38,9 +39,11 @@ const AllProduct = () => {
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage);
+      dispatch(messageClear());
     }
     if (errorMessage) {
       toast.error(errorMessage);
+      dispatch(messageClear());
     }
   }, [successMessage, errorMessage]);
 

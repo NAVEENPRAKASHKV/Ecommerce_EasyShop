@@ -26,6 +26,8 @@ class productController {
         brand,
       } = field;
       const { images } = files;
+      console.log(field);
+      console.log(files);
 
       // Validate required fields
       if (
@@ -41,7 +43,7 @@ class productController {
         console.log(field);
         return responseReturn(res, 400, { error: "All fields are required" });
       }
-
+      console.log(images);
       if (!images) {
         return responseReturn(res, 400, {
           error: "At least one image is required",

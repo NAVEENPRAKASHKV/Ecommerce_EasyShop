@@ -9,8 +9,6 @@ import { add_product, messageClear } from "../../store/Reducers/productReducer";
 import { toast } from "react-hot-toast";
 import { PropagateLoader } from "react-spinners";
 import { overRideStyle } from "./../../utils/spinnerProperty";
-import { Cropper } from "react-cropper";
-import "cropperjs/dist/cropper.css";
 
 const AddProduct = () => {
   const [state, setState] = useState({
@@ -25,17 +23,14 @@ const AddProduct = () => {
   const [category, setCategory] = useState(""); //to set category input from the modal
   const [allCategory, setAllCategory] = useState([]); //all category
   const [searchValue, setSearchValue] = useState("");
+  const [images, setImages] = useState([]); //images
+  const [imageShow, SetImageShow] = useState([]); //url of the images
 
   const dispatch = useDispatch();
   const { categories } = useSelector((store) => store.category);
   const { successMessage, errorMessage, loader } = useSelector(
     (store) => store.product
   );
-  const [cropper, setCropper] = useState(null); // Cropper instance
-  const [cropImage, setCropImage] = useState(null); // Image to crop
-  const [isCropping, setIsCropping] = useState(false); // Toggle cropping modal
-  const [images, setImages] = useState([]); // Final cropped images
-  const [imageShow, setImageShow] = useState([]); // Images to display
 
   //fetchin the category and update category list
   useEffect(() => {
@@ -62,7 +57,7 @@ const AddProduct = () => {
         brand: "",
         stock: "",
       });
-      setImageShow([]);
+      SetImageShow([]);
       setImages([]);
       setCategory("");
     }
@@ -77,7 +72,7 @@ const AddProduct = () => {
     const filterdImages = images.filter((_, index) => index !== i);
     const filterdUrl = imageShow.filter((_, index) => index !== i);
     setImages(filterdImages);
-    setImageShow(filterdUrl);
+    SetImageShow(filterdUrl);
   };
   //handle input data
   const inputHandle = (e) => {
@@ -94,7 +89,7 @@ const AddProduct = () => {
       tempImages[index] = img;
       tempUrl[index] = { url: URL.createObjectURL(img) };
       setImages([...tempImages]);
-      setImageShow([...imageShow]);
+      SetImageShow([...imageShow]);
     }
   };
   // handle new image upload
@@ -102,8 +97,12 @@ const AddProduct = () => {
     const files = e.target.files;
     const length = files.length;
     if (length > 0) {
-      setCropImage(URL.createObjectURL(files[0]));
-      setIsCropping(true);
+      setImages([...images, ...files]);
+      let imageUrl = [];
+      for (let i = 0; i < length; i++) {
+        imageUrl.push({ url: URL.createObjectURL(files[i]) });
+      }
+      SetImageShow([...imageShow, ...imageUrl]);
     }
   };
   // category search
@@ -136,7 +135,6 @@ const AddProduct = () => {
       toast.error("All fields are required");
       return;
     }
-    console.log(images);
     if (!images || images.length === 0) {
       toast.error("Image of the product is mandatory");
       return;
@@ -156,6 +154,13 @@ const AddProduct = () => {
     for (let index = 0; index < images.length; index++) {
       formData.append("images", images[index]);
     }
+
+    // Debugging FormData content
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
+
+    // Dispatch action
     dispatch(add_product(formData));
   };
 
@@ -350,6 +355,7 @@ const AddProduct = () => {
                 <span>Select Image</span>
               </label>
               <input
+                multiple
                 type="file"
                 id="image"
                 className="hidden"
@@ -368,58 +374,6 @@ const AddProduct = () => {
                   "Add Category"
                 )}
               </button>
-            </div>
-            {/* modal for cropping*/}
-            <div>
-              {isCropping && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
-                    <h3 className="text-lg font-semibold mb-4">Crop Image</h3>
-                    <Cropper
-                      className="w-full h-64"
-                      src={cropImage}
-                      aspectRatio={1}
-                      viewMode={1}
-                      guides={true}
-                      scalable={true}
-                      cropBoxResizable={true}
-                      onInitialized={(instance) => setCropper(instance)}
-                    />
-                    <div className="mt-4 flex justify-end space-x-3">
-                      <button
-                        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (cropper) {
-                            const croppedCanvas = cropper.getCroppedCanvas();
-                            croppedCanvas.toBlob((blob) => {
-                              if (blob) {
-                                const file = new File(
-                                  [blob],
-                                  "cropped-image.jpg",
-                                  { type: "image/jpeg" }
-                                );
-                                setImages([...images, file]);
-                                const imageUrl = URL.createObjectURL(file);
-                                setImageShow([...imageShow, { url: imageUrl }]); // Update displayed images with the new image URL
-                                setIsCropping(false);
-                              }
-                            });
-                          }
-                        }}
-                      >
-                        Crop
-                      </button>
-                      <button
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                        onClick={() => setIsCropping(false)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </form>
         </div>
