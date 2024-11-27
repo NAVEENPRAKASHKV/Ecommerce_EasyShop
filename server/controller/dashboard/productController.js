@@ -123,7 +123,7 @@ class productController {
         responseReturn(res, 201, { message: "Product added successfully" });
       } catch (error) {
         console.error("Error adding product:", error.message);
-        responseReturn(res, 500, { error: "Internal server error" });
+        return responseReturn(res, 500, { error: "Internal server error" });
       }
     });
   }; //add_product end method
@@ -164,34 +164,48 @@ class productController {
     }
   };
   product_update = async (req, res) => {
-    console.log(req.body);
-    let {
-      name,
-      description,
-      stock,
-      price,
-      discount,
-      brand,
-      productId,
-      category,
-    } = req.body;
+    console.log("this is update");
+    const form = formidable({ multiples: true });
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error("Formidable parsing error:", err);
+        return responseReturn(res, 400, { error: "Form parsing failed" });
+      }
 
-    console.log("Updating product...");
-    try {
+      let {
+        name,
+        category,
+        description,
+        stock,
+        price,
+        discount,
+        brand,
+        productId,
+      } = fields;
+
+      const { images } = files;
+
+      // Validate required fields
       if (
-        !productId ||
         !name ||
         !category ||
         !description ||
         !stock ||
         !price ||
         !discount ||
-        !brand
+        !brand ||
+        !productId
       ) {
         return responseReturn(res, 400, { error: "All fields are required" });
       }
 
-      // Validate numerical fields
+      name = name.trim();
+      const slug = name
+        .replace(/[^a-zA-Z0-9 ]/g, "") // Remove special characters
+        .split(" ")
+        .join("-")
+        .toLowerCase();
+
       const stockNumber = parseInt(stock);
       const priceNumber = parseInt(price);
       const discountNumber = parseInt(discount);
@@ -202,39 +216,78 @@ class productController {
         });
       }
 
-      // Check if product exists
-      const existProduct = await productModel.findById(productId);
-      if (!existProduct) {
-        return responseReturn(res, 404, { error: "Product not found" });
+      try {
+        let allImageUrl = [];
+
+        // Handle Cloudinary image uploads
+        if (images) {
+          if (
+            !process.env.CLOUD_NAME ||
+            !process.env.API_KEY ||
+            !process.env.API_SECRET
+          ) {
+            console.error("Missing Cloudinary configuration");
+            return responseReturn(res, 500, {
+              error: "Cloudinary configuration missing",
+            });
+          }
+
+          cloudinary.config({
+            cloud_name: process.env.CLOUD_NAME,
+            api_key: process.env.API_KEY,
+            api_secret: process.env.API_SECRET,
+            secure: true,
+          });
+
+          // Ensure `images` is an array
+          const imagesArray = Array.isArray(images) ? images : [images];
+
+          for (const image of imagesArray) {
+            const result = await cloudinary.uploader.upload(image.filepath, {
+              folder: "products",
+            });
+
+            if (!result || !result.url) {
+              return responseReturn(res, 400, { error: "Image upload failed" });
+            }
+            allImageUrl.push(result.url);
+          }
+        }
+
+        // Find product and update it
+        const product = await productModel.findById(productId);
+        if (!product) {
+          return responseReturn(res, 404, { error: "Product not found" });
+        }
+
+        // Add new images to existing ones
+        const updatedImages = [...(product.images || []), ...allImageUrl];
+
+        const updatedProduct = await productModel.findByIdAndUpdate(
+          productId,
+          {
+            name,
+            slug,
+            category: category.trim(),
+            description: description.trim(),
+            stock: stockNumber,
+            price: priceNumber,
+            discount: discountNumber,
+            brand: brand.trim(),
+            images: updatedImages,
+          },
+          { new: true } // Return the updated product
+        );
+
+        return responseReturn(res, 200, {
+          updatedProduct,
+          message: "Product updated successfully",
+        });
+      } catch (error) {
+        console.error("Error updating product:", error.message);
+        return responseReturn(res, 500, { error: "Internal server error" });
       }
-
-      // Prepare and update product
-      name = name.trim();
-      const slug = name
-        .replace(/[^a-zA-Z0-9 ]/g, "") // Remove special characters
-        .split(" ")
-        .join("-")
-        .toLowerCase();
-
-      await productModel.findByIdAndUpdate(productId, {
-        name,
-        description: description.trim(),
-        stock: stockNumber,
-        price: priceNumber,
-        discount: discountNumber,
-        brand: brand.trim(),
-        slug,
-      });
-
-      const updatedProduct = await productModel.findById(productId);
-      return responseReturn(res, 200, {
-        product: updatedProduct,
-        message: "Product updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating product:", error.message);
-      return responseReturn(res, 500, { error: "Internal server error" });
-    }
+    });
   };
 }
 

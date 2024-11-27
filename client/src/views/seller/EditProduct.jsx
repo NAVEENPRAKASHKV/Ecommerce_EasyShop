@@ -35,6 +35,7 @@ const EditProduct = () => {
   const { singleProduct, loader, successMessage, errorMessage } = useSelector(
     (store) => store.product
   );
+  const [newImages, setNewImages] = useState([]); // To track new images
 
   // useEffect
   useEffect(() => {
@@ -63,6 +64,7 @@ const EditProduct = () => {
         stock: "",
       });
       setCategory("");
+      setNewImages("");
     }
     if (errorMessage) {
       toast.error(errorMessage);
@@ -71,11 +73,14 @@ const EditProduct = () => {
   }, [successMessage, errorMessage]);
 
   // handling removing the images
-  const handleRemove = (i) => {
+  const handleRemove = (img, i) => {
     const filterdImages = images.filter((_, index) => index !== i);
     const filterdUrl = imageShow.filter((_, index) => index !== i);
+    const filterdNewImages = images.filter((_, index) => index !== i);
     setImages(filterdImages);
     SetImageShow(filterdUrl);
+    setNewImages(filterdNewImages);
+    console.log(imageShow);
   };
   //handle input data
   const inputHandle = (e) => {
@@ -93,6 +98,9 @@ const EditProduct = () => {
       tempUrl[index] = { url: URL.createObjectURL(img) };
       setImages([...tempImages]);
       SetImageShow([...imageShow]);
+      if (!newImages.includes(img)) {
+        setNewImages([...newImages, img]);
+      }
     }
   };
   // handle new image upload
@@ -106,6 +114,7 @@ const EditProduct = () => {
         imageUrl.push({ url: URL.createObjectURL(files[i]) });
       }
       SetImageShow([...imageShow, ...imageUrl]);
+      setNewImages([...newImages, ...files]);
     }
   };
   // category search
@@ -135,19 +144,21 @@ const EditProduct = () => {
     setCategory(singleProduct.category);
     SetImageShow(singleProduct.images);
   }, [singleProduct]);
+
   const update = (e) => {
     e.preventDefault();
-    const obj = {
-      name: state.name,
-      description: state.description,
-      discount: state.discount,
-      price: state.price,
-      brand: state.brand,
-      stock: state.stock,
-      productId: productId,
-      category: category,
-    };
-    dispatch(update_product(obj));
+    const formData = new FormData();
+    if (newImages.length > 0)
+      newImages.forEach((img) => formData.append("images", img));
+    formData.append("name", state.name);
+    formData.append("description", state.description);
+    formData.append("discount", state.discount);
+    formData.append("price", state.price);
+    formData.append("brand", state.brand);
+    formData.append("stock", state.stock);
+    formData.append("category", category);
+    formData.append("productId", productId);
+    dispatch(update_product(formData));
   };
 
   return (
@@ -305,7 +316,13 @@ const EditProduct = () => {
               {/* uploaded images */}
               {imageShow &&
                 imageShow.map((img, i) => (
-                  <div className="h-[180px] w-[180px] relative">
+                  <div
+                    className={` h-[180px] w-[180px] relative ${
+                      newImages.includes(images[i])
+                        ? "border-2 border-blue-500"
+                        : ""
+                    } `}
+                  >
                     <label htmlFor={i} className="cursor-pointer">
                       {/* display uploaded images */}
                       <img
@@ -323,7 +340,7 @@ const EditProduct = () => {
                     />
                     {/* remove icon */}
                     <span
-                      onClick={() => handleRemove(i)}
+                      onClick={() => handleRemove(img, i)}
                       className="absolute right-4  top-2 z-50 w-[20px] h-[20px] rounded-full bg-white hover:bg-red-500 flex justify-center items-center cursor-pointer"
                     >
                       <IoMdCloseCircle />
