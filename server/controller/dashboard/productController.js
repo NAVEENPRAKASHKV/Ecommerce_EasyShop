@@ -26,8 +26,6 @@ class productController {
         brand,
       } = field;
       const { images } = files;
-      console.log(field);
-      console.log(files);
 
       // Validate required fields
       if (
