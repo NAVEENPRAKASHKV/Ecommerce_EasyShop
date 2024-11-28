@@ -17,7 +17,7 @@ import { FaChevronDown } from "react-icons/fa";
 const Header = () => {
   const { pathname } = useLocation();
   const [showSidebar, setShowSidebar] = useState(false);
-  const [showCategory, setShowCategory] = useState(true);
+  const [showCategory, setShowCategory] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [category, setCategory] = useState("");
   const wishlist_count = 5;
@@ -118,14 +118,14 @@ const Header = () => {
                       pathname === "/" ? "bg-blue-700 text-white" : ""
                     } `}
                   >
-                    Home
+                    <Link to="/">Home</Link>
                   </li>
                   <li
                     className={`cursor-pointer px-3 py-2 rounded-md ${
-                      pathname === "/shop" ? "bg-blue-700 text-white" : ""
+                      pathname === "/shops" ? "bg-blue-700 text-white" : ""
                     } `}
                   >
-                    Shop
+                    <Link to="/shops">Shop</Link>
                   </li>
                   <li
                     className={`cursor-pointer px-3 py-2 rounded-md ${
@@ -228,14 +228,14 @@ const Header = () => {
                     pathname === "/" ? "bg-blue-700 text-white" : ""
                   } `}
                 >
-                  Home
+                  <Link to="/">Home</Link>
                 </li>
                 <li
                   className={`cursor-pointer px-3 py-2 rounded-md ${
                     pathname === "/shop" ? "bg-blue-700 text-white" : ""
                   } `}
                 >
-                  Shop
+                  <Link to="/shops">Shop</Link>
                 </li>
                 <li
                   className={`cursor-pointer px-3 py-2 rounded-md ${
