@@ -3,6 +3,9 @@ import { CiHeart } from "react-icons/ci";
 import { IoCartOutline } from "react-icons/io5";
 import { IoEyeOutline } from "react-icons/io5";
 import Ratings from "../Ratings";
+import { Link } from "react-router-dom";
+
+// this component is for the product to show in the shops page in list and grid feature
 const ShopProducts = ({ styles }) => {
   return (
     <div
@@ -32,15 +35,18 @@ const ShopProducts = ({ styles }) => {
                 />
                 {/* Hover Action Icons */}
                 <div className="absolute w-full flex justify-center items-center gap-2 -bottom-10 group-hover:bottom-20 transition-all opacity-0 group-hover:opacity-100">
-                  <button className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl">
+                  <Link className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl">
                     <CiHeart />
-                  </button>
-                  <button className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl">
+                  </Link>
+                  <Link className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl">
                     <IoCartOutline />
-                  </button>
-                  <button className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl">
+                  </Link>
+                  <Link
+                    to="/product/details/1"
+                    className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl"
+                  >
                     <IoEyeOutline />
-                  </button>
+                  </Link>
                 </div>
               </div>
               {/* details */}
