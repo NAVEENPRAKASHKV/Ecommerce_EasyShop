@@ -311,7 +311,7 @@ const Header = () => {
               </div>
               {/* hidden category list  */}
               <div
-                className={`bg-green-300  md-lg:relative transition-all duration-500 overflow-hidden z-[9999]  ${
+                className={`bg-green-300 absolute w-full  md-lg:relative transition-all duration-500 overflow-hidden z-[9999]  ${
                   showCategory ? "h-[300px]" : "h-0"
                 }`}
               >
