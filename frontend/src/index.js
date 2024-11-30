@@ -1,14 +1,29 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { Provider } from "react-redux";
+import { Suspense } from "react";
+import { Toaster } from "react-hot-toast";
+import store from "./store/index";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <Provider store={store}>
+    <Suspense>
+      <App />
+      <Toaster
+        toastOptions={{
+          position: "top-right",
+          style: {
+            background: "#283046",
+            color: "white",
+          },
+        }}
+      />
+    </Suspense>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
