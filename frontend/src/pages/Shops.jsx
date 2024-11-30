@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../componets/Header";
 import Footer from "../componets/Footer";
 import { Range } from "react-range";
@@ -11,6 +11,8 @@ import ShopProducts from "../componets/products/ShopProducts";
 import Pagination from "../componets/Pagination";
 import { Link } from "react-router-dom";
 import { FaAngleRight } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { get_products, get_categories } from "../store/reducers/homeReducer";
 
 const Shops = () => {
   const [filter, setFilter] = useState(true);
@@ -21,22 +23,20 @@ const Shops = () => {
   const [styles, setStyles] = useState("grid");
   const [perPage, setPerPage] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
-  const categorys = [
-    "Mobiles",
-    "Laptops",
-    "Speakers",
-    "Top wear",
-    "Footwear",
-    "Watches",
-    "Home Decor",
-    "Smart Watches",
-  ];
+  const dispatch = useDispatch();
+  const { categories, products, latest_product } = useSelector(
+    (store) => store.home
+  );
+  useEffect(() => {
+    dispatch(get_products());
+    dispatch(get_categories());
+  }, []);
 
   return (
     <div>
-      <Header />
+      <Header categories={categories} />
       {/* Breadcrumbs  */}
-      <section className='bg-[url("http://localhost:3000/images/banner/shop.png")] h-[180px] my-5  bg-cover bg-left'>
+      {/* <section className='bg-[url("http://localhost:3000/images/banner/shop.png")] h-[180px] my-5  bg-cover bg-left w-full  '>
         <div className="bg-[#2422228a] w-full h-full ">
           <div className="flex flex-col justify-center items-center text-white h-full w-full gap-2 text-xl ">
             <h1 className="font-extrabold">Shop Your Dream Products</h1>
@@ -49,9 +49,9 @@ const Shops = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       {/* filter layout and product side layout */}
-      <section className="py-16">
+      <section className="py-16 ">
         <div className="w-[85%] md:w-[80%] sm:w-[90%] lg:w-[90%] h-full mx-auto">
           {/* button for filter in the medium screen responsive */}
           <div className={` md:block hidden ${!filter ? "mb-6" : "mb-0"} `}>
@@ -78,17 +78,17 @@ const Shops = () => {
                   Category
                 </h2>
                 <div className="py-2">
-                  {categorys.map((c, i) => (
+                  {categories.map((c, i) => (
                     <div
-                      key={i}
+                      key={c._id}
                       className="flex justify-start items-center gap-2 py-1"
                     >
-                      <input type="checkbox" id={c} />
+                      <input type="checkbox" id={c.categoryName} />
                       <label
                         className="text-slate-600 block cursor-pointer"
-                        htmlFor={c}
+                        htmlFor={c.categoryName}
                       >
-                        {c}
+                        {c.categoryName}
                       </label>
                     </div>
                   ))}
@@ -241,7 +241,7 @@ const Shops = () => {
               </div>
               {/* latest product  */}
               <div>
-                <Products title="Latest Products" />
+                <Products title="Latest Products" products={latest_product} />
               </div>
             </div>
             {/* product side layout */}
@@ -282,7 +282,7 @@ const Shops = () => {
               </div>
               {/* product list */}
               <div className="">
-                <ShopProducts styles={styles} />
+                <ShopProducts styles={styles} products={products} />
               </div>
               <div className="w-full flex justify-end mt-4 pr-7">
                 <Pagination
@@ -297,7 +297,6 @@ const Shops = () => {
           </div>
         </div>
       </section>
-
       <Footer />
     </div>
   );

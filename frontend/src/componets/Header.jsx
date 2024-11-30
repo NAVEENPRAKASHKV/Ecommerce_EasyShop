@@ -14,7 +14,7 @@ import { IoIosCall } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaChevronDown } from "react-icons/fa";
 
-const Header = () => {
+const Header = ({ categories }) => {
   const { pathname } = useLocation();
   const [showSidebar, setShowSidebar] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
@@ -22,16 +22,7 @@ const Header = () => {
   const [category, setCategory] = useState("");
   const wishlist_count = 5;
   const user = true;
-  const categorys = [
-    "Mobiles",
-    "Laptops",
-    "Speakers",
-    "Top wear",
-    "Footwear",
-    "Watches",
-    "Home Decor",
-    "Smart Watches",
-  ];
+
   return (
     <div className="w-full bg-white relative">
       {/* first header */}
@@ -312,17 +303,22 @@ const Header = () => {
               {/* hidden category list  */}
               <div
                 className={`bg-green-300 absolute w-full  md-lg:relative transition-all duration-500 overflow-hidden z-[9999]  ${
-                  showCategory ? "h-[300px]" : "h-0"
+                  showCategory ? "h-auto rounded-b-md" : "h-0"
                 }`}
               >
                 <ul className="flex flex-col justify-center items-center gap-4 mt-3 mx-3  ">
-                  {categorys.map((item, index) => {
+                  {categories.map((item) => {
                     return (
                       <li
-                        key={index}
-                        className="font-semibold hover:bg-white w-full py-2 flex justify-center cursor-pointer"
+                        key={item._id}
+                        className="font-semibold hover:bg-white w-full py-2 flex justify-start cursor-pointer"
                       >
-                        <Link>{item}</Link>
+                        <img
+                          src={item.image}
+                          className="w-[30px] h-[30px] rounded-full overflow-hidden mx-5"
+                          alt=""
+                        />
+                        <Link>{item.categoryName}</Link>
                       </li>
                     );
                   })}
@@ -342,9 +338,9 @@ const Header = () => {
                   className="px-2 py-1"
                 >
                   <option value="">Select Category</option>
-                  {categorys.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
+                  {categories.map((item) => (
+                    <option key={item._id} value={item.categoryName}>
+                      {item.categoryName}
                     </option>
                   ))}
                 </select>

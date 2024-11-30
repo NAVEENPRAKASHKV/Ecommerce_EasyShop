@@ -6,7 +6,7 @@ import Ratings from "../Ratings";
 import { Link } from "react-router-dom";
 
 // this component is for the product to show in the shops page in list and grid feature
-const ShopProducts = ({ styles }) => {
+const ShopProducts = ({ styles, products }) => {
   return (
     <div
       className={`w-full grid gap-3 ${
@@ -15,23 +15,25 @@ const ShopProducts = ({ styles }) => {
           : "grid-cols-1 "
       }`}
     >
-      {[1, 2, 3, 4, 5, 6].map((prod, index) => {
+      {products.map((prod) => {
         return (
-          <div key={index} className="p-2">
+          <div key={prod._id} className="p-2">
             <div
               className={`flex transition-all group rounded-md bg-white m-2 sm:w-[60%] xs:w-[70%]  duration-1000 shadow-lg hover:-translate-y-3 ${
                 styles === "grid" ? "flex-col " : ""
               }`}
             >
-              <div className={`overflow-hidden p-3   `}>
+              <div
+                className={`overflow-hidden p-3 ${
+                  styles === "grid" ? "h-[240px]" : ""
+                }  `}
+              >
                 <img
                   className={`object-fill  w-full rounded-lg ${
-                    styles === "grid" ? "h-[200px]" : "h-[120px]"
+                    styles === "grid" ? "h-[240px]" : "h-[120px]"
                   } `}
-                  src={`http://localhost:3000/images/products/${
-                    index + 1
-                  }.webp`}
-                  alt=""
+                  src={prod.images[0]}
+                  alt={prod.name}
                 />
                 {/* Hover Action Icons */}
                 <div className="absolute w-full flex justify-center items-center gap-2 -bottom-10 group-hover:bottom-20 transition-all opacity-0 group-hover:opacity-100">
@@ -42,7 +44,7 @@ const ShopProducts = ({ styles }) => {
                     <IoCartOutline />
                   </Link>
                   <Link
-                    to="/product/details/1"
+                    to={`/product/details/${prod.slug}`}
                     className="h-[38px] w-[38px] bg-white rounded-full flex justify-center items-center shadow-md hover:bg-green-500 hover:text-white text-xl"
                   >
                     <IoEyeOutline />
@@ -50,11 +52,11 @@ const ShopProducts = ({ styles }) => {
                 </div>
               </div>
               {/* details */}
-              <div className=" text-black font-semibold  px-3 my-2">
-                <h2>Product Name</h2>
-                <span>$656</span>
+              <div className=" text-black font-semibold flex  flex-col gap-3 px-3 my-2">
+                <h2 className="text-sm">{prod.name}</h2>
+                <span className="">{prod.price}</span>
                 <div className="flex">
-                  <Ratings ratings={2} />
+                  <Ratings ratings={prod.rating} />
                 </div>
               </div>
             </div>

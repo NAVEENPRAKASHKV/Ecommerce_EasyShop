@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const { dbConnect } = require("./utils/db");
 const categoryRouter = require("./routes/dashboard/categoryRoutes");
 const productRouter = require("./routes/dashboard/productRoutes");
-
+const homeRouter = require("./routes/Home/homeRoutes");
 const app = express();
 const PORT = process.env.PORT;
 
@@ -22,6 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use("/api/home", homeRouter);
 app.use("/api", authRouter);
 app.use("/api", categoryRouter);
 app.use("/api", productRouter);

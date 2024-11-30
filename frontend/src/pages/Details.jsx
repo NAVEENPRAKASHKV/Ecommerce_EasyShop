@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./../componets/Header";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaAngleRight } from "react-icons/fa";
 import Footer from "../componets/Footer";
 import Carousel from "react-multi-carousel";
@@ -17,13 +17,13 @@ import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { useDispatch, useSelector } from "react-redux";
+import { get_products, get_categories } from "../store/reducers/homeReducer";
+import { product_details } from "../store/reducers/homeReducer";
 
 const Details = () => {
-  const images = [1, 2, 3, 4, 5, 6];
   const [image, setImage] = useState("");
   const [state, setState] = useState("reviews");
-  const discount = 5;
-  const stock = 3;
   const responsive = {
     superLargeDesktop: {
       breakpoint: { max: 4000, min: 3000 },
@@ -54,9 +54,27 @@ const Details = () => {
       items: 2,
     },
   };
+
+  const { categories, product, relatedProducts, moreProducts } = useSelector(
+    (store) => store.home
+  );
+  const { slug } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(product_details(slug));
+  }, [slug]);
+
+  useEffect(() => {
+    dispatch(get_products());
+    dispatch(get_categories());
+  }, []);
+  useEffect(() => {
+    dispatch(product_details(slug));
+  }, [slug]);
+
   return (
     <div>
-      <Header />
+      <Header categories={categories} />
       {/* page heading with image */}
       <section className='bg-[url("http://localhost:3000/images/banner/shop.png")] h-[180px] my-5  bg-cover bg-left'>
         <div className="bg-[#2422228a] w-full h-full ">
@@ -67,7 +85,7 @@ const Details = () => {
               <span>
                 <FaAngleRight />
               </span>
-              <Link>Product</Link>
+              <Link>Product </Link>
             </div>
           </div>
         </div>
@@ -80,11 +98,11 @@ const Details = () => {
             <span>
               <FaAngleRight />
             </span>
-            <Link to="/">Category</Link>
+            <Link to="/">{product.category}</Link>
             <span>
               <FaAngleRight />
             </span>
-            <span>Product Name </span>
+            <span>{product.name}</span>
           </div>
         </div>
       </section>
@@ -97,16 +115,12 @@ const Details = () => {
               <div>
                 <img
                   className="h-[400px] w-full"
-                  src={
-                    image
-                      ? `http://localhost:3000/images/products/${image}.webp`
-                      : `http://localhost:3000/images/products/${images[2]}.webp`
-                  }
+                  src={image ? `${image}` : `${product?.images?.[0]}`}
                   alt="images"
                 />
                 {/* carousel */}
                 <div className="my-8">
-                  {images && (
+                  {product.images && (
                     <Carousel
                       autoPlay={true}
                       infinite={true}
@@ -115,13 +129,11 @@ const Details = () => {
                       transitionDuration={500}
                       responsive={responsive}
                     >
-                      {images.map((img, index) => (
+                      {product.images.map((img, index) => (
                         <div key={index} onClick={() => setImage(img)}>
                           <div className=" relative flex justify-center items-center ">
                             <img
-                              src={`http://localhost:3000/images/products/${
-                                index + 1
-                              }.webp`}
+                              src={`${img}`}
                               alt="images"
                               className="h-[120px]   object-cover cursor-pointer "
                             />
@@ -137,28 +149,33 @@ const Details = () => {
             <div className="flex flex-col justify-start">
               <div>
                 <div className="flex flex-col justify-start gap-4">
-                  <h1 className="text-2xl font-bold ">Product Name</h1>
+                  <h1 className="text-2xl font-bold ">{product.name}</h1>
                   {/* rating */}
                   <div className="flex justify-start items-center gap-5">
                     <div className="flex ">
-                      <Ratings ratings={4.5} />
+                      <Ratings ratings={product.rating} />
                     </div>
 
                     <span>(32 reviews)</span>
                   </div>
                   {/* discount and price */}
                   <div>
-                    {discount !== 0 ? (
+                    {product.discount !== 0 ? (
                       <div className="flex justify-start gap-3">
                         <h2 className=" text-red-600 text-xl font-bold">
                           Price
                         </h2>
                         <h2 className="line-through text-red-600 text-xl font-bold">
-                          ₹500
+                          {product.price}
                         </h2>
                         <h2 className=" text-red-600 text-xl font-bold">
-                          ₹{500 - Math.floor((discount * 500) / 100)} (-
-                          {discount}%)
+                          ₹
+                          {product.price -
+                            Math.floor(
+                              (product.discount * product.price) / 100
+                            )}
+                          (-
+                          {product.discount}%)
                         </h2>
                       </div>
                     ) : (
@@ -167,23 +184,18 @@ const Details = () => {
                           Price :
                         </h2>
                         <h2 className=" text-red-600 text-xl font-bold">
-                          ₹500
+                          {product.price}
                         </h2>
                       </div>
                     )}
                   </div>
                   {/* description */}
                   <div className="text-slate-600">
-                    <p>
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry. Lorem Ipsum has been the industry's
-                      standard dummy text ever since the 1500s, when an unknown
-                      printer took a galley
-                    </p>
+                    <p>{product.description}</p>
                   </div>
                   {/* count product & cart &  wishlist  */}
                   <div className="flex justify-start items-center gap-4 mt-5">
-                    {stock ? (
+                    {product.stock ? (
                       <div className="flex gap-4 ">
                         <div className="w-[120px] bg-zinc-300 flex justify-center items-center gap-5 px-2 py-2 font-bold rounded-md text-xl">
                           <button className="cursor-pointer w-[20px] h-[20px] flex justify-center rounded-full items-center hover:bg-zinc-600 hover:text-white">
@@ -206,7 +218,7 @@ const Details = () => {
                     </div>
                   </div>
                   {/* chat & buy & share and avilability */}
-                  <div className="flex flex-row  py-5 gap-5">
+                  <div className="flex flex-row mx-10 gap-5">
                     {/* left side */}
                     <div className="w-[150px] text-black font-bold text-base flex flex-col gap-5">
                       <span>Availability</span>
@@ -216,10 +228,12 @@ const Details = () => {
                     <div className="flex  gap-5 flex-col">
                       <span
                         className={`${
-                          stock ? "text-green-800" : "text-red-500"
+                          product.stock ? "text-green-800" : "text-red-500"
                         } font-bold`}
                       >
-                        {stock ? `In Stock(${stock})` : "Out Of Stock"}
+                        {product.stock
+                          ? `In Stock(${product.stock})`
+                          : "Out Of Stock"}
                       </span>
                       <ul className="flex justify-start items-center gap-3">
                         <li>
@@ -258,8 +272,8 @@ const Details = () => {
                     </div>
                   </div>
                   {/* buy now and chat  */}
-                  <div className="flex gap-3">
-                    {stock ? (
+                  <div className="flex gap-3 mx-10 mb-5">
+                    {product.stock ? (
                       <button className="px-8 py-3 h-[50px] cursor-pointer hover:shadow-lg hover:shadow-green-500/40 bg-[#247462] text-white">
                         Buy Now
                       </button>
@@ -289,16 +303,16 @@ const Details = () => {
               <div className="grid grid-cols-2">
                 <button
                   onClick={() => setState("reviews")}
-                  className={`bg-slate-500 text-white py-2  ${
-                    state === "reviews" ? "bg-green-800" : ""
+                  className={` text-white py-2  ${
+                    state === "reviews" ? "bg-green-800" : "bg-slate-500"
                   } `}
                 >
                   Reviews
                 </button>
                 <button
                   onClick={() => setState("description")}
-                  className={`bg-slate-500 text-white py-2  ${
-                    state === "description" ? "bg-green-800" : ""
+                  className={` text-white py-2  ${
+                    state === "description" ? "bg-green-800" : "bg-slate-500"
                   } `}
                 >
                   Description
@@ -309,25 +323,7 @@ const Details = () => {
                 {state === "reviews" ? (
                   <Reviews />
                 ) : (
-                  <p className="mt-10">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an unknown
-                    printer took a galley Lorem Ipsum is simply dummy text of
-                    the printing and typesetting industry. Lorem Ipsum has been
-                    the industry's standard dummy text ever since the 1500s,
-                    when an unknown printer took a galleyLorem Ipsum is simply
-                    dummy text of the printing and typesetting industry. Lorem
-                    Ipsum has been the industry's standard dummy text ever since
-                    the 1500s, when an unknown printer took a galleyLorem Ipsum
-                    is simply dummy text of the printing and typesetting
-                    industry. Lorem Ipsum has been the industry's standard dummy
-                    text ever since the 1500s, when an unknown printer took a
-                    galleyLorem Ipsum is simply dummy text of the printing and
-                    typesetting industry. Lorem Ipsum has been the industry's
-                    standard dummy text ever since the 1500s, when an unknown
-                    printer took a galley
-                  </p>
+                  <p className="mt-10 ">{product.description}</p>
                 )}
               </div>
             </div>
@@ -335,35 +331,38 @@ const Details = () => {
             <div className="w-[28%] md-lg:w-full">
               <div className="pl-4 md-lg:pl-0">
                 <div className="bg-slate-500 py-2 text-white pl-4">
-                  <h2>From Easy Shop</h2>
+                  <h2>From {product.shopName}</h2>
                 </div>
                 <div className="flex flex-col gap-5 mt-3 border p-3">
-                  {[1, 2, 3].map((p, i) => {
+                  {moreProducts.map((pro) => {
                     return (
-                      <div key={i} className="p-2 shadow-xl">
-                        <Link className="block">
+                      <div key={pro._id} className="p-2 shadow-xl">
+                        <Link
+                          to={`/product/details/${pro.slug}`}
+                          className="block"
+                        >
                           <div className="relative h-[200px] ">
                             <img
                               className="w-full h-full"
-                              src={`http://localhost:3000/images/products/${p}.webp`}
+                              src={`${pro.images[0]}`}
                               alt=""
                             />
-                            {discount !== 0 && (
+                            {pro.discount !== 0 && (
                               <div className="flex justify-center items-center absolute text-white w-[38px] h-[38px] rounded-full bg-red-500 font-semibold text-xs left-2 top-2">
-                                {discount}%
+                                {pro.discount}%
                               </div>
                             )}
                           </div>
 
-                          <h2 className="text-slate-600 py-1 font-bold">
-                            Product Name
+                          <h2 className="text-slate-600 py-1 font-semibold text-sm">
+                            {pro.name}
                           </h2>
-                          <div className="flex gap-2">
-                            <h2 className="text-lg font-bold text-slate-600">
-                              $434
+                          <div className="flex gap-4">
+                            <h2 className="text-md font-bold text-slate-600">
+                              ₹{pro.price}
                             </h2>
-                            <div className="flex items-center gap-2">
-                              <Ratings ratings={4.5} />
+                            <div className="flex items-center gap-1">
+                              <Ratings ratings={pro.rating} />
                             </div>
                           </div>
                         </Link>
@@ -400,39 +399,42 @@ const Details = () => {
               modules={[Pagination]}
               className="mySwiper"
             >
-              {[1, 2, 3, 4, 5, 6].map((p, i) => {
+              {relatedProducts.map((relatedPro) => {
                 return (
-                  <SwiperSlide key={i}>
-                    <Link className="block shadow-2xl">
+                  <SwiperSlide key={relatedPro._id}>
+                    <Link
+                      to={`/product/details/${relatedPro.slug}`}
+                      className="block "
+                    >
                       <div className="relative h-[270px] flex flex-col ">
                         {/* image */}
                         <div className="w-full h-[270px]">
                           <img
                             className="h-[270px] w-full"
-                            src={`http://localhost:3000/images/products/${p}.webp`}
+                            src={`${relatedPro.images[0]}`}
                             alt=""
                           />
                           <div className="absolute h-full w-full top-0 left-0 bg-[#000] opacity-25 hover:opacity-50 transition-all duration-500"></div>
                         </div>
                         {/* discount */}
-                        {discount !== 0 && (
+                        {relatedPro.discount !== 0 && (
                           <div className="flex justify-center items-center absolute text-white w-[38px] h-[38px] rounded-full bg-red-500 font-semibold text-xs left-2 top-2">
-                            {discount}%
+                            {relatedPro.discount}%
                           </div>
                         )}
                       </div>
                       <div>
                         {/* product details */}
                         <div className="p-4 flex flex-col gap-1 text-black ">
-                          <h2 className="text-slate-600 text-lg font-bold">
-                            Product Name
+                          <h2 className="text-slate-600 text-sm ">
+                            {relatedPro.name}
                           </h2>
                           <div className="flex justify-start items-center gap-3 ">
                             <h2 className="text-lg font-bold text-slate-600">
-                              $434
+                              ₹{relatedPro.price}
                             </h2>
                             <div className="flex">
-                              <Ratings ratings={4.5} />
+                              <Ratings ratings={relatedPro.rating} />
                             </div>
                           </div>
                         </div>
