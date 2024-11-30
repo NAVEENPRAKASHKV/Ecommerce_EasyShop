@@ -4,7 +4,7 @@ import RatingTemp from "./RatingTemp";
 import Pagination from "./Pagination";
 
 const Reviews = () => {
-  const [parPage, setParPage] = useState(1);
+  const [perPage, setPerPage] = useState(1);
   const [pageNumber, setPageNumber] = useState(10);
   return (
     <div className="mt-5  ">
@@ -115,7 +115,7 @@ const Reviews = () => {
               pageNumber={pageNumber}
               setPageNumber={setPageNumber}
               totalItem={10}
-              parPage={parPage}
+              perPage={perPage}
               showItem={Math.floor(10 / 3)}
             />
           }
