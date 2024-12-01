@@ -3,7 +3,7 @@ import Header from "../componets/Header";
 import Footer from "../componets/Footer";
 import { FaFacebookF } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { get_categories } from "../store/reducers/homeReducer";
 import {
@@ -20,6 +20,7 @@ const Register = () => {
     email: "",
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { categories } = useSelector((store) => store.home);
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -35,7 +36,7 @@ const Register = () => {
   useEffect(() => {
     dispatch(get_categories());
   }, []);
-  const { loader, errorMessage, successMessage } = useSelector(
+  const { loader, errorMessage, userInfo, successMessage } = useSelector(
     (store) => store.authUser
   );
   useEffect(() => {
@@ -47,7 +48,10 @@ const Register = () => {
       toast.error(errorMessage);
       dispatch(messageClear());
     }
-  }, [successMessage, errorMessage]);
+    if (userInfo) {
+      navigate("/");
+    }
+  }, [successMessage, errorMessage, userInfo]);
 
   return (
     <div>

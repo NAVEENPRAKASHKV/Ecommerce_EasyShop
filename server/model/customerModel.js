@@ -20,8 +20,8 @@ const customerSchema = Schema(
       type: String,
       required: true,
     },
-    isDeleted: { type: Boolean, default: false }, // Soft delete flag
-    deletedAt: { type: Date, default: null },
+    isBlocked: { type: Boolean, default: false },
+    blockedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

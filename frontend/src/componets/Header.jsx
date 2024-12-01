@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineMarkEmailRead } from "react-icons/md";
 import { FaMobileScreen } from "react-icons/fa6";
 import { CiFacebook } from "react-icons/ci";
@@ -13,6 +13,7 @@ import { MdShoppingCart } from "react-icons/md";
 import { IoIosCall } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaChevronDown } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 const Header = ({ categories }) => {
   const { pathname } = useLocation();
@@ -22,6 +23,7 @@ const Header = ({ categories }) => {
   const [category, setCategory] = useState("");
   const wishlist_count = 5;
   const user = false;
+  const { userInfo } = useSelector((store) => store.authUser);
 
   return (
     <div className="w-full bg-white relative">
@@ -60,12 +62,12 @@ const Header = ({ categories }) => {
               </ul>
             </div>
             <div className="flex flex-row">
-              {user ? (
+              {userInfo ? (
                 <Link className="flex flex-row justify-center items-center gap-2 font-semibold">
                   <span>
                     <FaUser />
                   </span>
-                  <span>Naveen</span>
+                  <span>{userInfo.name}</span>
                 </Link>
               ) : (
                 <Link
@@ -197,12 +199,12 @@ const Header = ({ categories }) => {
                 </span>
               </div>
               <div className="flex flex-col w-9/12 justify-center items-center">
-                {user ? (
+                {userInfo ? (
                   <Link className="flex flex-col justify-center items-center  font-semibold">
                     <span className="w-[30px] h-[30px] bg-slate-200 flex justify-center items-center rounded-full hover:bg-slate-400">
                       <FaUser />
                     </span>
-                    <span>Naveen</span>
+                    <span>{userInfo.name}</span>
                   </Link>
                 ) : (
                   <Link className="w-[30px] h-[30px] bg-slate-200 flex justify-center items-center rounded-full hover:bg-slate-400">

@@ -3,15 +3,23 @@ import Header from "../componets/Header";
 import Footer from "../componets/Footer";
 import { FaFacebookF } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { get_categories } from "../store/reducers/homeReducer";
+import {
+  customer_login,
+  messageClear,
+} from "../store/reducers/authUserReducer";
+import { toast } from "react-hot-toast";
+import { ClipLoader } from "react-spinners";
+
 const Login = () => {
   const [state, setState] = useState({
     password: "",
     email: "",
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { categories } = useSelector((store) => store.home);
 
   useEffect(() => {
@@ -27,8 +35,25 @@ const Login = () => {
   };
   const handleForm = (e) => {
     e.preventDefault();
-    console.log(state);
+    dispatch(customer_login(state));
   };
+  const { loader, errorMessage, successMessage, userInfo } = useSelector(
+    (store) => store.authUser
+  );
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+    if (userInfo) {
+      navigate("/");
+    }
+  }, [successMessage, errorMessage, userInfo]);
 
   return (
     <div>
@@ -71,8 +96,11 @@ const Login = () => {
                     />
                   </div>
 
-                  <button className="px-8 w-full py-2 bg-[#059473] shadow-lg hover:shadow-green-500/40 text-white rounded-md">
-                    Login
+                  <button
+                    disabled={loader}
+                    className="px-8 w-full py-2 bg-[#059473] shadow-lg hover:shadow-green-500/40 text-white rounded-md"
+                  >
+                    {loader ? <ClipLoader size={30} color="white" /> : "Login"}
                   </button>
                   <div className=" flex justify-end m-2 text-blue-600">
                     <Link>Forget Password</Link>
