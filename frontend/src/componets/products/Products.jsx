@@ -64,7 +64,7 @@ const Products = ({ title, products }) => {
                 <Link
                   key={j}
                   className="flex justify-start items-start bg-green-200 rounded-lg"
-                  to="#"
+                  to={`/product/details/${pl.slug}`}
                 >
                   <img
                     className="w-[110px] h-[110px] m-2 rounded-md"

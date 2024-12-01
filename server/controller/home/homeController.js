@@ -83,8 +83,6 @@ class homeController {
     }
   };
   product_details = async (req, res) => {
-    console.log("Product details page in the controller");
-
     const { slug } = req.params;
     try {
       const product = await productModel.findOne({ slug });

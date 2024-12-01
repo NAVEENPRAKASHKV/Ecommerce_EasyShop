@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../componets/Header";
 import Footer from "../componets/Footer";
 import { FaFacebookF } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { get_categories } from "../store/reducers/homeReducer";
+import {
+  customer_register,
+  messageClear,
+} from "../store/reducers/authUserReducer";
+import { toast } from "react-hot-toast";
+import { ClipLoader } from "react-spinners";
 
 const Register = () => {
   const [state, setState] = useState({
@@ -11,6 +19,8 @@ const Register = () => {
     password: "",
     email: "",
   });
+  const dispatch = useDispatch();
+  const { categories } = useSelector((store) => store.home);
   const handleInput = (e) => {
     const { name, value } = e.target;
     setState({
@@ -20,12 +30,28 @@ const Register = () => {
   };
   const handleForm = (e) => {
     e.preventDefault();
-    console.log(state);
+    dispatch(customer_register(state));
   };
+  useEffect(() => {
+    dispatch(get_categories());
+  }, []);
+  const { loader, errorMessage, successMessage } = useSelector(
+    (store) => store.authUser
+  );
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [successMessage, errorMessage]);
 
   return (
     <div>
-      <Header />
+      <Header categories={categories} />
       <div className="bg-slate-200 mt-4">
         <div className="w-full justify-center items-center p-10">
           <div className="grid grid-cols-2 w-[60%] mx-auto bg-white rounded-md md:grid-cols-1 sm:w-[90%] md-lg:w-[80%]">
@@ -78,8 +104,15 @@ const Register = () => {
                     />
                   </div>
 
-                  <button className="px-8 w-full py-2 bg-[#059473] shadow-lg hover:shadow-green-500/40 text-white rounded-md">
-                    Register
+                  <button
+                    disabled={loader}
+                    className="px-8 w-full py-2 bg-[#059473] shadow-lg hover:shadow-green-500/40 text-white rounded-md"
+                  >
+                    {loader ? (
+                      <ClipLoader size={30} color="white" />
+                    ) : (
+                      "Register"
+                    )}
                   </button>
                 </form>
                 <div className="flex justify-center items-center py-2">

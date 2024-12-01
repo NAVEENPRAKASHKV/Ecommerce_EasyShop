@@ -7,6 +7,7 @@ const { dbConnect } = require("./utils/db");
 const categoryRouter = require("./routes/dashboard/categoryRoutes");
 const productRouter = require("./routes/dashboard/productRoutes");
 const homeRouter = require("./routes/Home/homeRoutes");
+const customerAuthRouter = require("./routes/Home/customerAuthRoutes");
 const app = express();
 const PORT = process.env.PORT;
 
@@ -26,6 +27,7 @@ app.use("/api/home", homeRouter);
 app.use("/api", authRouter);
 app.use("/api", categoryRouter);
 app.use("/api", productRouter);
+app.use("/api", customerAuthRouter);
 
 dbConnect();
 app.listen(PORT, () => console.log(`server is running on port ${PORT}`));

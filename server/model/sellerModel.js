@@ -12,6 +12,8 @@ const sellerSchema = new Schema(
     method: { type: String, required: true }, // to denot which method he is used to sign in
     image: { type: String, default: "" },
     shopInfo: { type: Object, default: {} },
+    isDeleted: { type: Boolean, default: false }, // Soft delete flag
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

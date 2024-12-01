@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../componets/Header";
 import Footer from "../componets/Footer";
 import { FaFacebookF } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import { get_categories } from "../store/reducers/homeReducer";
 const Login = () => {
   const [state, setState] = useState({
     password: "",
     email: "",
   });
+  const dispatch = useDispatch();
+  const { categories } = useSelector((store) => store.home);
+
+  useEffect(() => {
+    dispatch(get_categories());
+  }, []);
+
   const handleInput = (e) => {
     const { name, value } = e.target;
     setState({
@@ -24,7 +32,7 @@ const Login = () => {
 
   return (
     <div>
-      <Header />
+      <Header categories={categories} />
       <div className="bg-slate-200 mt-4">
         <div className="w-full justify-center items-center p-10">
           <div className="grid grid-cols-2 w-[60%] mx-auto bg-white rounded-md md:grid-cols-1 sm:w-[90%] md-lg:w-[80%]">

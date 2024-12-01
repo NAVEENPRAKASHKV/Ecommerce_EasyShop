@@ -21,7 +21,7 @@ const Header = ({ categories }) => {
   const [searchValue, setSearchValue] = useState("");
   const [category, setCategory] = useState("");
   const wishlist_count = 5;
-  const user = true;
+  const user = false;
 
   return (
     <div className="w-full bg-white relative">
@@ -68,7 +68,10 @@ const Header = ({ categories }) => {
                   <span>Naveen</span>
                 </Link>
               ) : (
-                <Link className="flex flex-row justify-center items-center gap-2 font-semibold">
+                <Link
+                  to="/login"
+                  className="flex flex-row justify-center items-center gap-2 font-semibold"
+                >
                   <span>
                     <FaLock />
                   </span>
